@@ -265,12 +265,12 @@ function sendFingerprint() {
             "location": currentLocation,
             "time": Date.now(),
             "wifi-fingerprint": network_data
-        }
+        };
 
         var fingerprint = {
         	"find_payload": find_payload,
         	"coupon_code":currentLocationCoupon
-        }
+        };
 
         var route = "learn";
         if (currentLocation == "tracking") {
@@ -279,7 +279,7 @@ function sendFingerprint() {
         } else {
 			$('div#sending').html("Learning fingerprint for " + currentLocation );
         }
-        var servername = window.localStorage.getItem("server").toLowerCase();
+        var servername = window.localStorage.getItem("localServer").toLowerCase();
         if (servername.slice(-1) != '/') {
         	servername += "/";
         }
@@ -289,7 +289,9 @@ function sendFingerprint() {
 		$.ajax({
 		   type: "POST",
 		   url: servername + route,
-		   dataType: "json",
+		   url: servername + route,
+		   dataType:"json",
+		   contentType: "application/json",
 		   data: JSON.stringify(fingerprint),
 		   success: function(response) {
 		   	var d = new Date();
@@ -347,7 +349,7 @@ function storeVenueAndGPSLocation(results){
         }
     	$('div#scanning').html("Sending venue fingerprint to " + servername);
     	sendVenueFingerPrint();
-    	$('div#taggingStartScreen').show();
+    	$('div#taggingStartScreenID').show();
     	$('div#AdminUserID').hide();
 	}, function(){});
 
