@@ -103,8 +103,8 @@ function onUserButtonClick()
 	//select a venue from that list and store it on the client side
 	//start sending track data to
 
-	     storeGPSLocationUser();
-
+	storeGPSLocationUser();
+	$('div#(AdminUserID').hide();
 
 }
 
@@ -185,8 +185,8 @@ function track() {
 }
 function sendGPSFingerPrint(){
     var fingerprint={
-        "gpsLatitude":gpsLatitude,
-        "gpsLongitude" : gpsLongitude,
+        "gps_lat":gpsLatitude,
+        "gps_long" : gpsLongitude,
         "time":Date.now()
     }
     var servername = window.localStorage.getItem("localServer").toLowerCase();
@@ -198,13 +198,15 @@ function sendGPSFingerPrint(){
     }
     servername = servername + "getVenueForGPS";
     $.ajax({
-    		   type: "POST",
+    type: "POST",
     		   url: servername,
-    		   dataType: "json",
+    		   dataType:"json",
+    		   contentType: "application/json",
     		   data: JSON.stringify(fingerprint),
     		   success: function(response) {
     		   	var d = new Date();
     			var n = d.toString();
+    			console.log(JSON.stringify(response));
     			//if (learning == true || tracking == true) {
     		    // $('div#result').html( n + "<br><strong>" + response["message"] +"</strong>");
     			//}
@@ -221,8 +223,8 @@ function sendVenueFingerPrint(){
 
 	var fingerprint = {
             "venue": currentVenueLocation,
-            "gpsLatitude": gpsLatitude,
-            "gpsLongitude": gpsLongitude,
+            "gps_lat": gpsLatitude,
+            "gps_long": gpsLongitude,
             "time": Date.now()
         }
 
@@ -241,8 +243,9 @@ function sendVenueFingerPrint(){
 			//
 		   type: "POST",
 		   url: servername,
-		   dataType: "json",
-		   data: JSON.stringify(fingerprint),
+		   dataType:"json",
+           contentType: "application/json",
+           data: JSON.stringify(fingerprint),
 		   success: function(response) {
 		   	var d = new Date();
 			var n = d.toString();
@@ -295,7 +298,7 @@ function sendFingerprint() {
 		}
 		
 		var find_payload = {
-            "group": currentVenueLocation,
+            "group": currentVenueLocation+"_" + gpsLatitude+"_" +gpsLongitude,
             "username": window.localStorage.getItem("username").toLowerCase(),
             "password": "none",
             "location": currentLocation,
@@ -324,7 +327,6 @@ function sendFingerprint() {
         }
 		$.ajax({
 		   type: "POST",
-		   url: servername + route,
 		   url: servername + route,
 		   dataType:"json",
 		   contentType: "application/json",
@@ -593,7 +595,7 @@ function main() {
 
 	test = window.localStorage.getItem('localServer');
     	if (test == null || test.length < 1) {
-    	    servername  = 'http://192.168.1.157:5000';
+    	    servername  = 'http://192.168.43.227:5000';
     	    window.localStorage.setItem('localServer',servername)
     	}
 
