@@ -30,6 +30,10 @@ wifiExport.getWifiInfo = function(okcallback, failcallback) {
 	cordova.exec(okcallback, failcallback, 'WifiAdmin', 'getWifiInfo', []);
 };
 
+wifiExport.getLocationInfo = function(okcallback, failcallback) {
+    cordova.exec(okcallback,failcallback,'WifiAdmin', 'getGPSInfo', []);
+};
+
 // open / close
 wifiExport.enableWifi = function(istrue, okcallback, failcallback) {
 	cordova.exec(okcallback, failcallback, 'WifiAdmin', 'enableWifi', [ istrue ]);

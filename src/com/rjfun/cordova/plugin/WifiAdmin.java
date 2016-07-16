@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -25,6 +26,8 @@ public class WifiAdmin extends CordovaPlugin {
     private static final String ACTION_CONNECT_WIFI = "connectWifi";
     private static final String ACTION_ENABLE_WIFI_AP = "enableWifiAP";
     private static final String ACTION_ENABLE_WIFI_LOCK = "enableWifiLock";
+	private static final String ACTION_GPS_INFO = "getGPSInfo";
+
     
     private WifiLock wifiLock = null;
 
@@ -46,7 +49,10 @@ public class WifiAdmin extends CordovaPlugin {
         } else if (ACTION_ENABLE_WIFI_LOCK.equals(action)) {
             result = executeEnableWifiLock(inputs, callbackContext);
             
-        } else {
+        } else if(ACTION_GPS_INFO.equals(action)){
+			result = executeGetGPSInfo(inputs, callbackContext);
+		}
+		else {
             Log.d(LOGTAG, String.format("Invalid action passed: %s", action));
             result = new PluginResult(Status.INVALID_ACTION);
         }
@@ -55,6 +61,41 @@ public class WifiAdmin extends CordovaPlugin {
         
         return true;
     }
+	private PluginResult executeGetGPSInfo(JSONArray inputs, CallbackContext callbackContext) {
+		Log.w(LOGTAG, "executeGetGPSInfo");
+
+		Context context = cordova.getActivity().getApplicationContext();
+		GPSTracker gps= new GPSTracker(context);
+		double latitude=0;
+		double longitude=0;
+		if(gps!=null) {
+			Location location = gps.getLocation();
+			 latitude = location.getLatitude();
+			 longitude = location.getLongitude();
+			Log.d(LOGTAG, "GPS latitude:" + latitude);
+			Log.d(LOGTAG, "GPS longitude:" + longitude);
+		}
+		gps.stopUsingGPS();
+
+		JSONObject obj = new JSONObject();
+		try {
+			JSONObject activity = new JSONObject();
+			activity.put("GPSLatitude",latitude);
+			activity.put("GPSLongitude", longitude);
+
+			obj.put("activity", activity);
+
+
+
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+			callbackContext.error("JSON Exception");
+		}
+		callbackContext.success(obj);
+
+		return null;
+	}
     
     private PluginResult executeGetWifiInfo(JSONArray inputs, CallbackContext callbackContext) {
     	Log.w(LOGTAG, "executeGetWifiInfo");
