@@ -101,7 +101,10 @@ function onUserButtonClick()
 	//send GPS to server
 	//Response of server will have list of venues
 	//select a venue from that list and store it on the client side
-	//start sending track data to 
+	//start sending track data to
+
+	     storeGPSLocationUser();
+
 
 }
 
@@ -179,6 +182,39 @@ function track() {
 		stopScanning();
 		// clearInterval(alarmInterval);
 	}
+}
+function sendGPSFingerPrint(){
+    var fingerprint={
+        "gpsLatitude":gpsLatitude,
+        "gpsLongitude" : gpsLongitude,
+        "time":Date.now()
+    }
+    var servername = window.localStorage.getItem("localServer").toLowerCase();
+    if(servername.slice(-1)!= '/'){
+        servername += "/";
+    }
+    if (servername.indexOf("http") < 0) {
+            	servername = "http://" + servername;
+    }
+    servername = servername + "getVenueForGPS";
+    $.ajax({
+    		   type: "POST",
+    		   url: servername,
+    		   dataType: "json",
+    		   data: JSON.stringify(fingerprint),
+    		   success: function(response) {
+    		   	var d = new Date();
+    			var n = d.toString();
+    			//if (learning == true || tracking == true) {
+    		    // $('div#result').html( n + "<br><strong>" + response["message"] +"</strong>");
+    			//}
+    		   },
+    		   error: function(e) {
+    		   	if (learning == true || tracking == true) {
+    		     $('div#result').html('Error: ' + e.message);
+    		   	}
+    		   }
+    		});
 }
 
 function sendVenueFingerPrint(){
@@ -324,6 +360,31 @@ function getPollingInterval() {
 
 function storeCouponCode(results){
 	currentLocationCoupon = results.input1.toLowerCase();
+}
+function storeGPSLocationUser(results){
+
+    var wf = window.plugins.WifiAdmin;
+    wf.getGPSInfo(function(data){
+    console.log(JSON.stringify(data));
+    var gpsConnected= data['activity'];
+    if(gpsConnected != null)
+    {
+        gpsLatitude = gpsConnected['GPSLatitude'];
+        gpsLongitude = gpsConnected['GPSLongitude'];
+
+    }
+    var servername = window.localStorage.getItem("localServer").toLowerCase();
+    if (servername.slice(-1) != '/') {
+                    	servername += "/";
+            }
+            if (servername.indexOf("http") < 0) {
+            	servername = "http://" + servername;
+            }
+            $('div#scanning').html("Sending gps fingerprint to " + servername);
+                	sendGPSFingerPrint();
+
+
+    },function(){});
 }
 
 function storeVenueAndGPSLocation(results){
