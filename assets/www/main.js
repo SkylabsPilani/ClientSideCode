@@ -2,7 +2,7 @@ var scanningInterval;
 var toggle = true;
 var currentLocation = "none";
 var currentVenueLocation = "none";
-var currentVenueCoupon = "none";
+var currentLocationCoupon = "none";
 var gpsLongitude = "none";
 var gpsLatitude = "none";
 var isMobile;
@@ -197,6 +197,7 @@ function sendVenueFingerPrint(){
         	servername = "http://" + servername;
         }
 
+		servername = servername + "venueReg";
         //siddhaja:
 		$.ajax({
 			// siddhaja: This part is supposed to send local server the GPS data along with the venue name
@@ -266,8 +267,8 @@ function sendFingerprint() {
         }
 
         var fingerprint = {
-        	"find_payload"= find_payload,
-        	"coupon_code"=currentVenueCoupon
+        	"find_payload": find_payload,
+        	"coupon_code":currentLocationCoupon
         }
 
         var route = "learn";
@@ -319,7 +320,7 @@ function getPollingInterval() {
 }
 
 function storeCouponCode(results){
-	currentVenueCoupon = results.input1.toLowerCase();
+	currentLocationCoupon = results.input1.toLowerCase();
 }
 
 function storeVenueAndGPSLocation(results){
@@ -327,11 +328,12 @@ function storeVenueAndGPSLocation(results){
 	
 	var wf = window.plugins.WifiAdmin;
 	wf.getGPSInfo(function(data){
-	console.log( JSON.stringify(data) ); }, function(){});
-		
+	console.log( JSON.stringify(data) );
+
 	gpsLatitude = data['GPSLatitude'];
 	gpsLongitude = data['GPSLongitude'];
-	
+	}, function(){});
+
 	var servername = window.localStorage.getItem("localServer").toLowerCase();
     if (servername.slice(-1) != '/') {
             	servername += "/";
@@ -344,7 +346,7 @@ function storeVenueAndGPSLocation(results){
 	$('div#taggingStartScreen').show();
 }
 
-function storeLocationCoupon{
+function storeLocationCoupon(results){
 	currentLocationCoupon = results.input1.toLowerCase();
 }
 
@@ -373,6 +375,7 @@ function scanAndSend(results) {
             if (servername.indexOf("http") < 0) {
             	servername = "http://" + servername;
             }
+
 		$('div#scanning').html("Sending fingerprint to " + servername);
 		sendFingerprint();
 		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
@@ -516,7 +519,7 @@ function main() {
 
 	test = window.localStorage.getItem('localServer');
     	if (test == null || test.length < 1) {
-    	    servername  = 'siddhaja: ADD WHATEVER PUSHKAR GIVES ARE SERVER ADD.';
+    	    servername  = 'http://192.168.43.227:5000';
     	    window.localStorage.setItem('localServer',servername)
     	}
 
