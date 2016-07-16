@@ -306,7 +306,7 @@ function sendFingerprint() {
 		   	}
 		   }
 		});
-					
+
 		}, function(){});
 	}
 }
@@ -358,6 +358,30 @@ function storeVenueAndGPSLocation(results){
 
 function storeLocationCoupon(results){
 	currentLocationCoupon = results.input1.toLowerCase();
+
+	if (true) {
+
+    		clearInterval(scanningInterval);
+    		 var servername = window.localStorage.getItem("localServer").toLowerCase();
+                if (servername.slice(-1) != '/') {
+                	servername += "/";
+                }
+                if (servername.indexOf("http") < 0) {
+                	servername = "http://" + servername;
+                }
+
+    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		sendFingerprint();
+    		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
+    		// createAlarm(5, 30);
+    		if (isPersisting == true) {
+    			window.powermanagement.acquire();
+    			setBrightness(0);
+    		}
+
+
+    	}
+    	toggle = true;
 }
 
 function scanAndSend(results) {
@@ -365,6 +389,7 @@ function scanAndSend(results) {
 		results = {input1:"tracking",buttonIndex:1};
 	}
 	else{
+		currentLocation = results.input1.toLowerCase();
 		navigator.notification.prompt(
 				    'Add coupon associated with this location. Leave blank otherwise',  // message
 				    storeLocationCoupon,                  // callback to invoke
@@ -374,30 +399,8 @@ function scanAndSend(results) {
 				);
 	}
 
-	currentLocation = results.input1.toLowerCase();
-	if (results.buttonIndex == 1) {
-
-		clearInterval(scanningInterval);
-		 var servername = window.localStorage.getItem("localServer").toLowerCase();
-            if (servername.slice(-1) != '/') {
-            	servername += "/";
-            }
-            if (servername.indexOf("http") < 0) {
-            	servername = "http://" + servername;
-            }
-
-		$('div#scanning').html("Sending fingerprint to " + servername);
-		sendFingerprint();
-		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
-		// createAlarm(5, 30);
-		if (isPersisting == true) {
-			window.powermanagement.acquire();
-			setBrightness(0);			
-		}
 
 
-	}
-	toggle = true;
 }
 
 function togglePersist() { 
@@ -529,7 +532,7 @@ function main() {
 
 	test = window.localStorage.getItem('localServer');
     	if (test == null || test.length < 1) {
-    	    servername  = 'http://192.168.43.227:5000';
+    	    servername  = 'http://192.168.1.157:5000';
     	    window.localStorage.setItem('localServer',servername)
     	}
 
