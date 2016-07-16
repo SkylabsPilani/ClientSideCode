@@ -182,6 +182,7 @@ function track() {
 }
 
 function sendVenueFingerPrint(){
+
 	var fingerprint = {
             "venue": currentVenueLocation,
             "gpsLatitude": gpsLatitude,
@@ -329,22 +330,28 @@ function storeVenueAndGPSLocation(results){
 	var wf = window.plugins.WifiAdmin;
 	wf.getGPSInfo(function(data){
 	console.log( JSON.stringify(data) );
+	var gpsConnected = data['activity'];
 
-	gpsLatitude = data['GPSLatitude'];
-	gpsLongitude = data['GPSLongitude'];
-	}, function(){});
+	if(gpsConnected!=null)
+	{
+		gpsLatitude = gpsConnected['GPSLatitude'];
+		gpsLongitude = gpsConnected['GPSLongitude'];
+	}
 
 	var servername = window.localStorage.getItem("localServer").toLowerCase();
-    if (servername.slice(-1) != '/') {
-            	servername += "/";
-    }
-    if (servername.indexOf("http") < 0) {
-    	servername = "http://" + servername;
-    }
-	$('div#scanning').html("Sending venue fingerprint to " + servername);
-	sendVenueFingerPrint();
-	$('div#taggingStartScreen').show();
-	$('div#AdminUserID').hide();
+        if (servername.slice(-1) != '/') {
+                	servername += "/";
+        }
+        if (servername.indexOf("http") < 0) {
+        	servername = "http://" + servername;
+        }
+    	$('div#scanning').html("Sending venue fingerprint to " + servername);
+    	sendVenueFingerPrint();
+    	$('div#taggingStartScreen').show();
+    	$('div#AdminUserID').hide();
+	}, function(){});
+
+
 }
 
 function storeLocationCoupon(results){
