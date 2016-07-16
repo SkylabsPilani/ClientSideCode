@@ -1,6 +1,10 @@
 var scanningInterval;
 var toggle = true;
 var currentLocation = "none";
+var currentVenueLocation = "none";
+var currentVenueCoupon = "none";
+var gpsLongitude = "none";
+var gpsLatitude = "none";
 var isMobile;
 var press;
 var groupname;
@@ -81,6 +85,28 @@ $('button#options').html('Go back');
 
 }
 
+function onAdminButtonClick()
+{
+	navigator.notification.prompt(
+			    'Please enter venue name',  // message
+			    storeVenueAndGPSLocation,  // callback to invoke
+			    'Add this venue',            // title
+			    ['Ok','Exit'],             // buttonLabels
+			    'office'                 // defaultText
+			);
+}
+
+function onUserButtonClick()
+{
+	//send GPS to server
+	//Response of server will have list of venues
+	//select a venue from that list and store it on the client side
+	//start sending track data to 
+
+}
+
+
+
 function learn() {
 	if (tracking==true) {
 		track();
@@ -88,7 +114,7 @@ function learn() {
 	if (learning == false) {
 		$('div#ballsWaveG').show();
 		$('button#learn').toggleClass('active');
-		$('button#learn').html('Stop learning');
+		$('button#learn').html('Done Learning Location');
 		console.log('button#scanwifi');
 		if (toggle==true) {
 			navigator.notification.prompt(
@@ -155,6 +181,44 @@ function track() {
 	}
 }
 
+function sendVenueFingerPrint(){
+	var fingerprint = {
+            "venue": currentVenueLocation,
+            "gpsLatitude": gpsLatitude,
+            "gpsLongitude": gpsLongitude,
+            "time": Date.now()
+        }
+
+        var servername = window.localStorage.getItem("localServer").toLowerCase();
+        if (servername.slice(-1) != '/') {
+        	servername += "/";
+        }
+        if (servername.indexOf("http") < 0) {
+        	servername = "http://" + servername;
+        }
+
+        //siddhaja:
+		$.ajax({
+			// siddhaja: This part is supposed to send local server the GPS data along with the venue name
+			//
+		   type: "POST",
+		   url: servername,
+		   dataType: "json",
+		   data: JSON.stringify(fingerprint),
+		   success: function(response) {
+		   	var d = new Date();
+			var n = d.toString();
+			//if (learning == true || tracking == true) {
+		    // $('div#result').html( n + "<br><strong>" + response["message"] +"</strong>");
+			//}
+		   },
+		   error: function(e) {
+		   	if (learning == true || tracking == true) {
+		     $('div#result').html('Error: ' + e.message);
+		   	}
+		   }
+		});
+}
 
 function sendFingerprint() {
 	if(window.plugins && window.plugins.WifiAdmin) {
@@ -192,14 +256,20 @@ function sendFingerprint() {
 			network_data.push({"mac": item['BSSID'],"rssi": item['level']})
 		}
 		
-		var fingerprint = {
-            "group": window.localStorage.getItem("group").toLowerCase(),
+		var find_payload = {
+            "group": currentVenueLocation,
             "username": window.localStorage.getItem("username").toLowerCase(),
             "password": "none",
             "location": currentLocation,
             "time": Date.now(),
             "wifi-fingerprint": network_data
         }
+
+        var fingerprint = {
+        	"find_payload"= find_payload,
+        	"coupon_code"=currentVenueCoupon
+        }
+
         var route = "learn";
         if (currentLocation == "tracking") {
         	route = "track";
@@ -248,14 +318,55 @@ function getPollingInterval() {
 	return pollingInterval;
 }
 
+function storeCouponCode(results){
+	currentVenueCoupon = results.input1.toLowerCase();
+}
+
+function storeVenueAndGPSLocation(results){
+	currentVenueLocation = results.input1.toLowerCase();
+	
+	var wf = window.plugins.WifiAdmin;
+	wf.getGPSInfo(function(data){
+	console.log( JSON.stringify(data) ); }, function(){});
+		
+	gpsLatitude = data['GPSLatitude'];
+	gpsLongitude = data['GPSLongitude'];
+	
+	var servername = window.localStorage.getItem("localServer").toLowerCase();
+    if (servername.slice(-1) != '/') {
+            	servername += "/";
+    }
+    if (servername.indexOf("http") < 0) {
+    	servername = "http://" + servername;
+    }
+	$('div#scanning').html("Sending venue fingerprint to " + servername);
+	sendVenueFingerPrint();
+	$('div#taggingStartScreen').show();
+}
+
+function storeLocationCoupon{
+	currentLocationCoupon = results.input1.toLowerCase();
+}
+
 function scanAndSend(results) {
 	if (results == null) {
 		results = {input1:"tracking",buttonIndex:1};
 	}
+	else{
+		navigator.notification.prompt(
+				    'Add coupon associated with this location. Leave blank otherwise',  // message
+				    storeLocationCoupon,                  // callback to invoke
+				    'Add coupon',            // title
+				    ['Ok','Exit'],             // buttonLabels
+				    'GET50OFF'                 // defaultText
+				);
+	}
+
 	currentLocation = results.input1.toLowerCase();
 	if (results.buttonIndex == 1) {
+
 		clearInterval(scanningInterval);
-		 var servername = window.localStorage.getItem("server").toLowerCase();
+		 var servername = window.localStorage.getItem("localServer").toLowerCase();
             if (servername.slice(-1) != '/') {
             	servername += "/";
             }
@@ -264,7 +375,7 @@ function scanAndSend(results) {
             }
 		$('div#scanning').html("Sending fingerprint to " + servername);
 		sendFingerprint();
-		scanningInterval = setInterval(sendFingerprint,getPollingInterval());	
+		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
 		// createAlarm(5, 30);
 		if (isPersisting == true) {
 			window.powermanagement.acquire();
@@ -401,6 +512,13 @@ function main() {
 	if (test == null || test.length < 1) {
 	    window.localStorage.setItem('group',makeid())
 	} 
+
+
+	test = window.localStorage.getItem('localServer');
+    	if (test == null || test.length < 1) {
+    	    servername  = 'siddhaja: ADD WHATEVER PUSHKAR GIVES ARE SERVER ADD.';
+    	    window.localStorage.setItem('localServer',servername)
+    	}
 
 	test = window.localStorage.getItem('server');
 	if (test == null || test.length < 1) {
