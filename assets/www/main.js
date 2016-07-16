@@ -344,6 +344,7 @@ function storeVenueAndGPSLocation(results){
 	$('div#scanning').html("Sending venue fingerprint to " + servername);
 	sendVenueFingerPrint();
 	$('div#taggingStartScreen').show();
+	$('div#AdminUserID').hide();
 }
 
 function storeLocationCoupon(results){
