@@ -18,6 +18,28 @@ var POLLING_INTERVAL = "pollingInterval";
 var brightness = cordova.plugins.brightness;
 var isPersisting = false;
 
+function resetApp()
+{
+	clearInterval(scanningInterval);
+	clearInterval(scanningTrackInterval);
+	toggle = true;
+	currentLocation = "none";
+	currentVenueLocation = "none";
+	currentLocationCoupon = "none";
+	gpsLongitude = "none";
+	gpsLatitude = "none";
+	isMobile;
+	press;
+	groupname;
+	username;
+	servername;
+	learning = false;
+	tracking = false;
+	inoptions = false;
+	POLLING_INTERVAL = "pollingInterval";
+	brightness = cordova.plugins.brightness;
+	isPersisting = false;
+}
 function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -647,11 +669,16 @@ function setData(datatype,defaultname,friendlyname) {
 }
 
 
-
+function onDoneTagging()
+{
+	$('div#AdminUserID').show();
+	$('div#taggingStartScreenID').hide();
+	resetApp();
+}
 function initUIEvents() {
 	var isMobile = ( /(android|ipad|iphone|ipod)/i.test(navigator.userAgent) );
 	var press = isMobile ? 'touchstart' : 'mousedown';
-	
+
 	// document.getElementById('touchstart').addEventListener('touchstart', function(){ brightness.setBrightness(1, function(){};, function(){};);  };, false);
 
 
