@@ -1,4 +1,5 @@
 var scanningInterval;
+var scanningTrackInterval;
 var toggle = true;
 var currentLocation = "none";
 var currentVenueLocation = "none";
@@ -184,7 +185,7 @@ function track() {
 
 function trackScanAndSend()
 {
-			clearInterval(scanningInterval);
+			clearInterval(scanningTrackInterval);
     		 var servername = window.localStorage.getItem("localServer").toLowerCase();
                 if (servername.slice(-1) != '/') {
                 	servername += "/";
@@ -194,7 +195,7 @@ function trackScanAndSend()
                 }
     		$('div#scanning').html("Sending fingerprint to " + servername);
     		sendTrackFingerprint();
-    		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
+    		scanningTrackInterval = setInterval(sendTrackFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
     		if (isPersisting == true) {
     			window.powermanagement.acquire();
@@ -561,8 +562,6 @@ function storeLocationCoupon(results){
 	currentLocationCoupon = results.input1.toLowerCase();
 
 	if (true) {
-
-    		clearInterval(scanningInterval);
     		 var servername = window.localStorage.getItem("localServer").toLowerCase();
                 if (servername.slice(-1) != '/') {
                 	servername += "/";
@@ -573,14 +572,12 @@ function storeLocationCoupon(results){
 
     		$('div#scanning').html("Sending fingerprint to " + servername);
     		sendFingerprint();
-    		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
+			scanningInterval = setInterval(sendFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
     		if (isPersisting == true) {
     			window.powermanagement.acquire();
     			setBrightness(0);
     		}
-
-
     	}
     	toggle = true;
 }
@@ -599,9 +596,6 @@ function scanAndSend(results) {
 				    'GET50OFF'                 // defaultText
 				);
 	}
-
-
-
 }
 
 function togglePersist() { 
@@ -745,7 +739,7 @@ function main() {
     
     test = window.localStorage.getItem(POLLING_INTERVAL);
 	if (test == null || test.length < 1) {
-		window.localStorage.setItem('pollingInterval',3000); // default of 3000ms
+		window.localStorage.setItem('pollingInterval',2000); // default of 3000ms
 	}
 
 	$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
