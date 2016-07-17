@@ -18,6 +18,28 @@ var POLLING_INTERVAL = "pollingInterval";
 var brightness = cordova.plugins.brightness;
 var isPersisting = false;
 
+function resetApp()
+{
+	clearInterval(scanningInterval);
+	clearInterval(scanningTrackInterval);
+	toggle = true;
+	currentLocation = "none";
+	currentVenueLocation = "none";
+	currentLocationCoupon = "none";
+	gpsLongitude = "none";
+	gpsLatitude = "none";
+	isMobile;
+	press;
+	groupname;
+	username;
+	servername;
+	learning = false;
+	tracking = false;
+	inoptions = false;
+	POLLING_INTERVAL = "pollingInterval";
+	brightness = cordova.plugins.brightness;
+	isPersisting = false;
+}
 function toTitleCase(str)
 {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
@@ -193,7 +215,7 @@ function trackScanAndSend()
                 if (servername.indexOf("http") < 0) {
                 	servername = "http://" + servername;
                 }
-    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		//$('div#scanning').html("Sending fingerprint to " + servername);
     		sendTrackFingerprint();
     		scanningTrackInterval = setInterval(sendTrackFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
@@ -384,11 +406,11 @@ if(window.plugins && window.plugins.WifiAdmin) {
            data: JSON.stringify(fingerprint),
 		   success: function(response) {
 		   	var d = new Date();
-			var n = d.toString();
+
 			if (learning == true || tracking == true) {
-				$('div#result').html( n + "<br><strong>" + "You are at " + response.location.toString() +"</strong>");
+				$('div#result').html("<br><strong>" + "You are at " + response.location.toString() +"</strong>");
 				if(response.coupon_code != null)
-		     		$('div#result2').html( n + "<br><strong>" + "Coupon Code: " + response.coupon_code.toString() +"</strong>");
+		     		$('div#result2').html("<br><strong>" + "Coupon Code: " + response.coupon_code.toString() +"</strong>");
 			}
 		   },
 		   error: function(e) {
@@ -522,8 +544,8 @@ function storeGPSLocationUser(results){
             if (servername.indexOf("http") < 0) {
             	servername = "http://" + servername;
             }
-            $('div#scanning').html("Sending gps fingerprint to " + servername);
-                	sendGPSFingerPrint();
+
+            sendGPSFingerPrint();
 
 
     },function(){});
@@ -550,7 +572,7 @@ function storeVenueAndGPSLocation(results){
         if (servername.indexOf("http") < 0) {
         	servername = "http://" + servername;
         }
-    	$('div#scanning').html("Sending venue fingerprint to " + servername);
+    	//$('div#scanning').html("Sending venue fingerprint to " + servername);
     	sendVenueFingerPrint();
     	$('div#taggingStartScreenID').show();
     	$('div#AdminUserID').hide();
@@ -571,7 +593,7 @@ function storeLocationCoupon(results){
                 	servername = "http://" + servername;
                 }
 
-    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		//$('div#scanning').html("Sending fingerprint to " + servername);
     		sendFingerprint();
 			scanningInterval = setInterval(sendFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
@@ -639,7 +661,7 @@ function setData(datatype,defaultname,friendlyname) {
 				if (results.buttonIndex == 1) {
 					window.localStorage.setItem(datatype,results.input1);
 				}
-				$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
+				//$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
 			},                  // callback to invoke
 		    'Set ' + friendlyname,            // title
 		    ['Ok','Exit'],             // buttonLabels
@@ -648,11 +670,16 @@ function setData(datatype,defaultname,friendlyname) {
 }
 
 
-
+function onDoneTagging()
+{
+	$('div#AdminUserID').show();
+	$('div#taggingStartScreenID').hide();
+	resetApp();
+}
 function initUIEvents() {
 	var isMobile = ( /(android|ipad|iphone|ipod)/i.test(navigator.userAgent) );
 	var press = isMobile ? 'touchstart' : 'mousedown';
-	
+
 	// document.getElementById('touchstart').addEventListener('touchstart', function(){ brightness.setBrightness(1, function(){};, function(){};);  };, false);
 
 
@@ -743,7 +770,7 @@ function main() {
 		window.localStorage.setItem('pollingInterval',2000); // default of 3000ms
 	}
 
-	$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
+//	$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
 
     // Android customization
     cordova.plugins.backgroundMode.setDefaults({ text:'FIND is running.'});
