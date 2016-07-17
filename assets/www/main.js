@@ -638,7 +638,7 @@ function setData(datatype,defaultname,friendlyname) {
 				if (results.buttonIndex == 1) {
 					window.localStorage.setItem(datatype,results.input1);
 				}
-				$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
+				//$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
 			},                  // callback to invoke
 		    'Set ' + friendlyname,            // title
 		    ['Ok','Exit'],             // buttonLabels
@@ -742,7 +742,7 @@ function main() {
 		window.localStorage.setItem('pollingInterval',2000); // default of 3000ms
 	}
 
-	$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
+//	$('h2#user').html("Group: " + window.localStorage.getItem("group") + "<br>User: " + window.localStorage.getItem("username"));
 
     // Android customization
     cordova.plugins.backgroundMode.setDefaults({ text:'FIND is running.'});
