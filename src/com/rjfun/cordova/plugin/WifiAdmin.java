@@ -66,12 +66,12 @@ public class WifiAdmin extends CordovaPlugin {
 
 		Context context = cordova.getActivity().getApplicationContext();
 		GPSTracker gps= new GPSTracker(context);
-		double latitude=0;
-		double longitude=0;
+		int latitude=0;
+		int longitude=0;
 		if(gps!=null) {
 			Location location = gps.getLocation();
-			 latitude = location.getLatitude();
-			 longitude = location.getLongitude();
+			 latitude = (int)location.getLatitude();
+			 longitude = (int)location.getLongitude();
 			Log.d(LOGTAG, "GPS latitude:" + latitude);
 			Log.d(LOGTAG, "GPS longitude:" + longitude);
 		}

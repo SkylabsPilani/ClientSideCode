@@ -157,7 +157,7 @@ function setNewAlarm() {
 var alarmInterval;
 
 function track() {
-
+	//currentVenueLocation = "were";
 	if (learning==true) {
 		learn();
 	}
@@ -165,7 +165,7 @@ function track() {
 		$('div#ballsWaveG').show();
 		$('button#track').toggleClass('active');
 		$('button#track').html('Stop tracking');
-		scanAndSend(null);
+		trackScanAndSend(null);
 		tracking = true;
 		createAlarm(10,61);
 
@@ -182,23 +182,63 @@ function track() {
 	}
 }
 
+function trackScanAndSend()
+{
+			clearInterval(scanningInterval);
+    		 var servername = window.localStorage.getItem("localServer").toLowerCase();
+                if (servername.slice(-1) != '/') {
+                	servername += "/";
+                }
+                if (servername.indexOf("http") < 0) {
+                	servername = "http://" + servername;
+                }
+    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		sendTrackFingerprint();
+    		scanningInterval = setInterval(sendFingerprint,getPollingInterval());
+    		// createAlarm(5, 30);
+    		if (isPersisting == true) {
+    			window.powermanagement.acquire();
+    			setBrightness(0);
+    		}
+
+
+}
+function startTracking()
+{
+	track();
+}
 
 function populateVenueLocations(response){
-    if(response != null){
-            //Add list items as clickable buttons
-        var div = document.getElementById('listButtons');
-        $(document).ready(function() {
-          for(var item in response.items) {
-              var btn = document.createElement('button');
-                 btn.setAttribute('type', 'button');
-                 btn.setAttribute('onclick', );
-                 btn.setAttribute('value',item);
-                 btn.setAttribute('id', 'button' + item);
-                 div.appendChild(btn);
-          }
-        });
-    }
+   if(response != null){
+           //Add list items as clickable buttons
+       var div = document.getElementById('listButtons');
+       var count=0;
+
+       $(document).ready(function() {
+         for(var item in response.items) {
+
+             var btn = document.createElement('button');
+                btn.setAttribute("type","button");
+
+                btn.setAttribute("id", response.items[count]);
+                btn.onclick=function(){
+               	$('div#listButtons').hide();
+               	currentVenueLocation = btn.id.toString();
+               	startTracking();
+                };
+                var t= document.createTextNode(response.items[count]);
+                btn.appendChild(t);
+
+
+                div.appendChild(btn);
+
+
+			count++;
+         }
+       });
+   }
 }
+
 function sendGPSFingerPrint(){
     var fingerprint={
         "gps_lat":gpsLatitude,
@@ -275,6 +315,90 @@ function sendVenueFingerPrint(){
 		});
 }
 
+function sendTrackFingerprint() {
+
+if(window.plugins && window.plugins.WifiAdmin) {
+	    // Enable background mode
+	    if (cordova.plugins.backgroundMode.isEnabled() == false) {
+		    cordova.plugins.backgroundMode.enable();
+	    }
+
+		var wf = window.plugins.WifiAdmin;
+		wf.getWifiInfo(function(data){
+		console.log( JSON.stringify(data) );
+
+		var wifiConnected = data['activity'];
+		var wifiList = data['available'];
+
+		var html = "";
+		if(wifiConnected != null) {
+			html += "Connected to:<br/>" +
+				"SSID: " + wifiConnected['SSID'] + "<br/>" +
+				"BSSID: " + wifiConnected['BSSID'] + "<br/>" +
+				"Mac Addr: " + wifiConnected['MacAddress'] + "<br/>" +
+				"IP: " + ipIntToString( wifiConnected['IpAddress'] ) + "<br/>" +
+				"Speed: " + wifiConnected['LinkSpeed'] + " Mbps<br/>";
+		} else {
+			html += "Not connected.<br/>";
+		}
+
+		html += "<br/>Available Wifi:<br/>";
+		network_data = []
+		while(wifiList.length >0) {
+			var item = wifiList.shift();
+			html += item['BSSID'] + '(' + item['level'] + 'dB, feq:' + (item['frequency']/1000.0).toFixed(2) + 'GHz)';
+			if(item['BSSID'] === wifiConnected['BSSID']) html += '(*)';
+			html += '<br/>';
+			network_data.push({"mac": item['BSSID'],"rssi": item['level']})
+		}
+
+		var temp = {
+						"group": currentVenueLocation+"_" + gpsLatitude+"_" +gpsLongitude,
+                        "username": window.localStorage.getItem("username").toLowerCase(),
+                        "password": "none",
+                        "location": "tracking",
+                        "time": Date.now(),
+                        "wifi-fingerprint": network_data
+		}
+
+		var fingerprint = {
+            "find_payload": temp
+        }
+        var route = "track";
+        $('div#sending').html("Tracking current location.");
+
+        var servername = window.localStorage.getItem("localServer").toLowerCase();
+        if (servername.slice(-1) != '/') {
+        	servername += "/";
+        }
+        if (servername.indexOf("http") < 0) {
+        	servername = "http://" + servername;
+        }
+		$.ajax({
+		   type: "POST",
+		   url: servername+route,
+           dataType:"json",
+           contentType: "application/json",
+           data: JSON.stringify(fingerprint),
+		   success: function(response) {
+		   	var d = new Date();
+			var n = d.toString();
+			if (learning == true || tracking == true) {
+				$('div#result').html( n + "<br><strong>" + "You are at " + response.location.toString() +"</strong>");
+				if(response.coupon_code != null)
+		     		$('div#result2').html( n + "<br><strong>" + "Coupon Code: " + response.coupon_code.toString() +"</strong>");
+			}
+		   },
+		   error: function(e) {
+		   	if (learning == true || tracking == true) {
+		     $('div#result').html('Error: ' + e.message);
+		   	}
+		   }
+		});
+
+		}, function(){});
+	}
+}
 function sendFingerprint() {
 	if(window.plugins && window.plugins.WifiAdmin) {
 	    // Enable background mode
