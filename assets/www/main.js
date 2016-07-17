@@ -102,10 +102,8 @@ function onUserButtonClick()
 	//Response of server will have list of venues
 	//select a venue from that list and store it on the client side
 	//start sending track data to
-
+    $('div#AdminUserID').hide();
 	storeGPSLocationUser();
-	$('div#(AdminUserID').hide();
-
 }
 
 
@@ -183,6 +181,24 @@ function track() {
 		// clearInterval(alarmInterval);
 	}
 }
+
+
+function populateVenueLocations(response){
+    if(response != null){
+            //Add list items as clickable buttons
+        var div = document.getElementById('listButtons');
+        $(document).ready(function() {
+          for(var item in response.items) {
+              var btn = document.createElement('button');
+                 btn.setAttribute('type', 'button');
+                 btn.setAttribute('onclick', );
+                 btn.setAttribute('value',item);
+                 btn.setAttribute('id', 'button' + item);
+                 div.appendChild(btn);
+          }
+        });
+    }
+}
 function sendGPSFingerPrint(){
     var fingerprint={
         "gps_lat":gpsLatitude,
@@ -206,10 +222,8 @@ function sendGPSFingerPrint(){
     		   success: function(response) {
     		   	var d = new Date();
     			var n = d.toString();
-    			console.log(JSON.stringify(response));
-    			//if (learning == true || tracking == true) {
-    		    // $('div#result').html( n + "<br><strong>" + response["message"] +"</strong>");
-    			//}
+    			console.log("TAG" + JSON.stringify(response));
+                populateVenueLocations(response);
     		   },
     		   error: function(e) {
     		   	if (learning == true || tracking == true) {
@@ -595,7 +609,7 @@ function main() {
 
 	test = window.localStorage.getItem('localServer');
     	if (test == null || test.length < 1) {
-    	    servername  = 'http://192.168.43.227:5000';
+    	    servername  = 'http://ec2-52-90-79-130.compute-1.amazonaws.com';
     	    window.localStorage.setItem('localServer',servername)
     	}
 
