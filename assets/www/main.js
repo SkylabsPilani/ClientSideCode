@@ -220,12 +220,13 @@ function populateVenueLocations(response){
 
              var btn = document.createElement('button');
                 btn.setAttribute("type","button");
-
-                btn.setAttribute("id", response.items[count]);
-                btn.onclick=function(){
-               	$('div#listButtons').hide();
-               	currentVenueLocation = btn.id.toString();
-               	startTracking();
+                var id = response.items[count];
+                btn.setAttribute("id", id);
+                btn.onclick=clickhandler;
+                function clickhandler(){
+               		$('div#listButtons').hide();
+               		currentVenueLocation = this.id.toString()
+               		startTracking();
                 };
                 var t= document.createTextNode(response.items[count]);
                 btn.appendChild(t);
@@ -494,7 +495,7 @@ function getPollingInterval() {
 	if (pollingInterval == null || pollingInterval == "null" || pollingInterval < 2){
 		pollingInterval = 2000;
 	} else {
-		pollingInterval = 1000*parseInt(pollingInterval);
+		pollingInterval = 3*parseInt(pollingInterval);
 	}
 	return pollingInterval;
 }
