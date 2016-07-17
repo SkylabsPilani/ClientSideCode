@@ -193,7 +193,7 @@ function trackScanAndSend()
                 if (servername.indexOf("http") < 0) {
                 	servername = "http://" + servername;
                 }
-    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		//$('div#scanning').html("Sending fingerprint to " + servername);
     		sendTrackFingerprint();
     		scanningTrackInterval = setInterval(sendTrackFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
@@ -383,11 +383,11 @@ if(window.plugins && window.plugins.WifiAdmin) {
            data: JSON.stringify(fingerprint),
 		   success: function(response) {
 		   	var d = new Date();
-			var n = d.toString();
+
 			if (learning == true || tracking == true) {
-				$('div#result').html( n + "<br><strong>" + "You are at " + response.location.toString() +"</strong>");
+				$('div#result').html("<br><strong>" + "You are at " + response.location.toString() +"</strong>");
 				if(response.coupon_code != null)
-		     		$('div#result2').html( n + "<br><strong>" + "Coupon Code: " + response.coupon_code.toString() +"</strong>");
+		     		$('div#result2').html("<br><strong>" + "Coupon Code: " + response.coupon_code.toString() +"</strong>");
 			}
 		   },
 		   error: function(e) {
@@ -521,8 +521,8 @@ function storeGPSLocationUser(results){
             if (servername.indexOf("http") < 0) {
             	servername = "http://" + servername;
             }
-            $('div#scanning').html("Sending gps fingerprint to " + servername);
-                	sendGPSFingerPrint();
+
+            sendGPSFingerPrint();
 
 
     },function(){});
@@ -549,7 +549,7 @@ function storeVenueAndGPSLocation(results){
         if (servername.indexOf("http") < 0) {
         	servername = "http://" + servername;
         }
-    	$('div#scanning').html("Sending venue fingerprint to " + servername);
+    	//$('div#scanning').html("Sending venue fingerprint to " + servername);
     	sendVenueFingerPrint();
     	$('div#taggingStartScreenID').show();
     	$('div#AdminUserID').hide();
@@ -570,7 +570,7 @@ function storeLocationCoupon(results){
                 	servername = "http://" + servername;
                 }
 
-    		$('div#scanning').html("Sending fingerprint to " + servername);
+    		//$('div#scanning').html("Sending fingerprint to " + servername);
     		sendFingerprint();
 			scanningInterval = setInterval(sendFingerprint,getPollingInterval());
     		// createAlarm(5, 30);
